@@ -1,0 +1,94 @@
+﻿@model IEnumerable<Tarefa>
+
+<div class="row">
+    @* Aplicação dos filtros *@
+    <div class="col-md-3">
+
+        <form asp-controller="Home" asp-action="Filtrar" method="post">
+
+            <div class="mb-3">
+                <label class="form-label">Categoria:</label>
+                <select name="filtro"
+                        class="form-select"
+                        asp-items="@(new SelectList(ViewBag.Categorias, "CategoriaId", "Nome", ViewBag.Filtros.CategoriaId))">
+                    <option value="todos">Todos</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Data de Vencimento:</label>
+                <select name="filtro"
+                        class="form-select"
+                        asp-items="@(new SelectList(ViewBag.VencimetoValores, "Key", "Value", ViewBag.Filtros.Vencimento))">
+                    <option value="todos">Todos</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Situação:</label>
+                <select name="filtro"
+                        class="form-select"
+                        asp-items="@(new SelectList(ViewBag.Status, "StatusId", "Nome", ViewBag.Filtros.StatusId))">
+                    <option value="todos">Todos</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+            <a asp-action="Index" asp-route-id="" class="btn btn-primary">Limpar</a>
+
+        </form>
+
+    </div>
+
+    @* Renderização das tarefas *@
+    <div class="col-md-9">
+
+        <form asp-action="MarcarCompleto" asp-route-id="@ViewBag.Filtros.FiltroString" method="post">
+
+            <table class="table table-bordered table-striped mt-2">
+                <thead>
+                    <tr>
+                        <th>Descrição</th> 
+                        <th>Categoria</th>
+                        <th>Data de Vencimento</th>
+                        <th>Status</th>
+                        <th class="w-25"></th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (Tarefa tarefa in Model)
+                    {
+                        string atrasado = tarefa.Atrasado ? "bg-warning" : "";
+
+                        <tr>
+                            <td>@tarefa.Descricao</td>
+                            <td>@tarefa.Categoria.Nome</td>
+                            <td class="@atrasado">@tarefa.DataVencimento?.ToShortDateString()</td>
+                            <td class="@atrasado">@tarefa.Status.Nome</td>
+                            <td>
+                                @if (tarefa.StatusId == "aberto")
+                                {
+                                    <button type="submit"
+                                            class="btn btn-primary btn-sm"
+                                            name="@nameof(Tarefa.Id)" 
+                                            value="@tarefa.Id"
+                                    >
+                                        Completar
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+
+        </form>
+
+        <form asp-action="DeletarCompletos" method="post" asp-route-id="@ViewBag.Filtros.FiltroString">
+            <a asp-controller="Home" asp-action="Adicionar" class="btn btn-success">Adicionar Tarefa</a>
+            <button type="submit" class="btn btn-danger">Deletar Tarefas Completas</button>
+        </form>
+    </div> 
+</div>
